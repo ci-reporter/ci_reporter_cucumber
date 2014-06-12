@@ -6,6 +6,10 @@ system.
 [cuke]: http://cukes.info/
 [ci]: https://github.com/ci-reporter/ci_reporter
 
+## Supported versions
+
+The latest release of Cucumber 1.3 is supported.
+
 ## Installation
 
 Add this line to your application's Gemfile:
