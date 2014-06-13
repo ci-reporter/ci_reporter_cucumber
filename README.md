@@ -5,6 +5,7 @@ system.
 
 [![Gem Version](https://badge.fury.io/rb/ci_reporter_cucumber.svg)](http://badge.fury.io/rb/ci_reporter_cucumber)
 [![Build Status](https://travis-ci.org/ci-reporter/ci_reporter_cucumber.svg?branch=master)](https://travis-ci.org/ci-reporter/ci_reporter_cucumber)
+[![Dependency Status](https://gemnasium.com/ci-reporter/ci_reporter_cucumber.svg)](https://gemnasium.com/ci-reporter/ci_reporter_cucumber)
 [![Code Climate](https://codeclimate.com/github/ci-reporter/ci_reporter_cucumber.png)](https://codeclimate.com/github/ci-reporter/ci_reporter_cucumber)
 
 [cuke]: http://cukes.info/
