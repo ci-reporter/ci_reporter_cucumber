@@ -17,7 +17,7 @@ Given /^that I am a lazy hacker$/ do
 end
 
 Given /^I don't bother writing cucumber features$/ do
- false.should be true
+ expect(false).to eql true
 end
 
 Then /^I should be fired$/ do

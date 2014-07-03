@@ -5,9 +5,10 @@ require 'ci/reporter/test_utils/unit'
 describe "ci_reporter ci:setup:cucumber task" do
   include CI::Reporter::TestUtils::Unit
 
+  let(:rake) { Rake::Application.new }
+
   before(:each) do
-    @rake = Rake::Application.new
-    Rake.application = @rake
+    Rake.application = rake
     load CI_REPORTER_LIB + '/ci/reporter/rake/cucumber.rb'
     save_env "CI_REPORTS"
     save_env "CUCUMBER_OPTS"
@@ -19,19 +20,19 @@ describe "ci_reporter ci:setup:cucumber task" do
     Rake.application = nil
   end
 
-  it "should set ENV['CUCUMBER_OPTS'] to include cucumber formatter args" do
-    @rake["ci:setup:cucumber"].invoke
-    ENV["CUCUMBER_OPTS"].should =~ /--format\s+CI::Reporter::Cucumber/
+  it "sets ENV['CUCUMBER_OPTS'] to include cucumber formatter args" do
+    rake["ci:setup:cucumber"].invoke
+    expect(ENV["CUCUMBER_OPTS"]).to match /--format\s+CI::Reporter::Cucumber/
   end
 
-  it "should not set ENV['CUCUMBER_OPTS'] to require cucumber_loader" do
-    @rake["ci:setup:cucumber"].invoke
-    ENV["CUCUMBER_OPTS"].should_not =~ /.*--require\s+\S*cucumber_loader.*/
+  it "does not set ENV['CUCUMBER_OPTS'] to require cucumber_loader" do
+    rake["ci:setup:cucumber"].invoke
+    expect(ENV["CUCUMBER_OPTS"]).to_not match /.*--require\s+\S*cucumber_loader.*/
   end
 
-  it "should append to ENV['CUCUMBER_OPTS'] if it already contains a value" do
+  it "appends to ENV['CUCUMBER_OPTS'] if it already contains a value" do
     ENV["CUCUMBER_OPTS"] = "somevalue".freeze
-    @rake["ci:setup:cucumber"].invoke
-    ENV["CUCUMBER_OPTS"].should =~ /somevalue.*\s--format\s+CI::Reporter::Cucumber/
+    rake["ci:setup:cucumber"].invoke
+    expect(ENV["CUCUMBER_OPTS"]).to match /somevalue.*\s--format\s+CI::Reporter::Cucumber/
   end
 end
