@@ -32,7 +32,7 @@ $ bundle
 ## Usage
 
 Require the reporter in your Rakefile, and ensure that
-`ci:setup:cucumber` is a dependency of your RSpec task:
+`ci:setup:cucumber` is a dependency of your Cucumber task:
 
 ```ruby
 require 'ci/reporter/rake/cucumber'
