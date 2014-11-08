@@ -55,6 +55,7 @@ module CI
       end
 
       def before_background(*args)
+        @scenario = 'Background'
       end
 
       def after_background(*args)
