@@ -46,6 +46,8 @@ task :cucumber => 'ci:setup:cucumber'
 
 ### Advanced usage
 
+If you want to treat `undefined` and `pending` steps as failures (instead of skipping them), set the `CI_PENDING_IS_FAILURE` environment variable to `true`.
+
 Refer to the shared [documentation][ci] for details on setting up
 CI::Reporter.
 
