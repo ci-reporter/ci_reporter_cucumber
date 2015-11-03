@@ -80,8 +80,10 @@ module CI
         case steps.status
         when :pending, :undefined
           @test_case.name = "#{@test_case.name} (PENDING)"
+          @test_case.skipped = true
         when :skipped
           @test_case.name = "#{@test_case.name} (SKIPPED)"
+          @test_case.skipped = true
         when :failed
           @test_case.failures << CucumberFailure.new(steps)
         end
