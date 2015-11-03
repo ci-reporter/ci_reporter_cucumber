@@ -74,13 +74,21 @@ module CI
         @test_case.start
       end
 
+      def treat_pending_as_failure?
+        ENV['CI_PENDING_IS_FAILURE'] == 'true'
+      end
+
       def after_steps(steps)
         @test_case.finish
 
         case steps.status
         when :pending, :undefined
-          @test_case.name = "#{@test_case.name} (PENDING)"
-          @test_case.skipped = true
+          if treat_pending_as_failure?
+            @test_case.failures << CucumberFailure.new(steps)
+          else
+            @test_case.name = "#{@test_case.name} (PENDING)"
+            @test_case.skipped = true
+          end
         when :skipped
           @test_case.name = "#{@test_case.name} (SKIPPED)"
           @test_case.skipped = true

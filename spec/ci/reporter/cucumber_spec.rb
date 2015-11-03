@@ -106,6 +106,7 @@ module CI::Reporter
 
       context "after steps" do
         before :each do
+          allow(cucumber).to receive(:treat_pending_as_failure?).and_return(false)
           cucumber.before_steps(step)
           allow(test_case).to receive(:name=)
           allow(test_case).to receive(:skipped=)
@@ -162,6 +163,33 @@ module CI::Reporter
           it "marks the test case as skipped" do
             expect(test_case).to receive(:skipped=).with(true)
             cucumber.after_steps(step)
+          end
+        end
+
+        context "when treating undefined/pending steps as failures" do
+          let(:failures) { [] }
+          let(:cucumber_failure) { double("cucumber_failure") }
+
+          before :each do
+            allow(cucumber).to receive(:treat_pending_as_failure?).and_return(true)
+            allow(test_case).to receive(:failures).and_return(failures)
+            allow(CI::Reporter::CucumberFailure).to receive(:new).and_return(cucumber_failure)
+          end
+
+          it "creates a new cucumber failure with a pending step" do
+            allow(step).to receive(:status).and_return(:pending)
+            expect(failures).to be_empty
+            cucumber.after_steps(step)
+            expect(failures).to_not be_empty
+            expect(failures.first).to eql cucumber_failure
+          end
+
+          it "creates a new cucumber failure with an undefined step" do
+            allow(step).to receive(:status).and_return(:undefined)
+            expect(failures).to be_empty
+            cucumber.after_steps(step)
+            expect(failures).to_not be_empty
+            expect(failures.first).to eql cucumber_failure
           end
         end
       end
