@@ -13,6 +13,10 @@ Feature: Example Cucumber feature
     And I don't bother writing cucumber features
     Then I should be fired
 
+  Scenario: Forgetful hacker
+    Given that I am a forgetful hacker
+    And I forgot to define a cucumber step
+
   Scenario: Bad coder
     Given that I can't code for peanuts
     And I write step definitions that throw exceptions

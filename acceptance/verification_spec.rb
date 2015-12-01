@@ -15,8 +15,9 @@ describe "Cucumber acceptance" do
     subject(:result) { Accessor.new(load_xml_result(report_path)) }
 
     it { is_expected.to have(0).errors }
+    it { expect(result.skipped_count).to be 1 }
     it { is_expected.to have(2).failures }
-    it { is_expected.to have(3).testcases }
+    it { is_expected.to have(4).testcases }
 
     it_behaves_like "a report with consistent attribute counts"
     it_behaves_like "assertions are not tracked"
@@ -34,6 +35,12 @@ describe "Cucumber acceptance" do
           expect(failure.type).to match /ExpectationNotMetError/
         end
       end
+    end
+
+    describe "the test the forgetful hacker wrote" do
+      subject(:testcase) { result.testcase('Forgetful hacker (PENDING)') }
+
+      it { is_expected.to be_skipped }
     end
 
     describe "the test the bad coder wrote" do
