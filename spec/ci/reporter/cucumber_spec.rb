@@ -107,6 +107,8 @@ module CI::Reporter
       context "after steps" do
         before :each do
           cucumber.before_steps(step)
+          allow(test_case).to receive(:name=)
+          allow(test_case).to receive(:skipped=)
         end
 
         it "indicates that the test case has finished" do
@@ -121,25 +123,46 @@ module CI::Reporter
           expect(testcases.first).to eql test_case
         end
 
-        it "skips and alters the name of a test case that is pending to include '(PENDING)'" do
-          allow(step).to receive(:status).and_return(:pending)
-          expect(test_case).to receive(:name=).with("Step Name (PENDING)")
-          expect(test_case).to receive(:skipped=).with(true)
-          cucumber.after_steps(step)
+        context "a pending test" do
+          before { allow(step).to receive(:status).and_return(:pending) }
+
+          it "alters the name of a test case that is pending to include '(PENDING)'" do
+            expect(test_case).to receive(:name=).with("Step Name (PENDING)")
+            cucumber.after_steps(step)
+          end
+
+          it "marks the test case as skipped" do
+            expect(test_case).to receive(:skipped=).with(true)
+            cucumber.after_steps(step)
+          end
         end
 
-        it "skips and alters the name of a test case that is undefined to include '(PENDING)'" do
-          allow(step).to receive(:status).and_return(:undefined)
-          expect(test_case).to receive(:name=).with("Step Name (PENDING)")
-          expect(test_case).to receive(:skipped=).with(true)
-          cucumber.after_steps(step)
+        context "an undefined test" do
+          before { allow(step).to receive(:status).and_return(:undefined) }
+
+          it "alters the name of a test case that is undefined to include '(PENDING)'" do
+            expect(test_case).to receive(:name=).with("Step Name (PENDING)")
+            cucumber.after_steps(step)
+          end
+
+          it "marks the test case as skipped" do
+            expect(test_case).to receive(:skipped=).with(true)
+            cucumber.after_steps(step)
+          end
         end
 
-        it "skips and alters the name of a test case that was skipped to include '(SKIPPED)'" do
-          allow(step).to receive(:status).and_return(:skipped)
-          expect(test_case).to receive(:name=).with("Step Name (SKIPPED)")
-          expect(test_case).to receive(:skipped=).with(true)
-          cucumber.after_steps(step)
+        context "a skipped test" do
+          before { allow(step).to receive(:status).and_return(:skipped) }
+
+          it "alters the name of a test case that was skipped to include '(SKIPPED)'" do
+            expect(test_case).to receive(:name=).with("Step Name (SKIPPED)")
+            cucumber.after_steps(step)
+          end
+
+          it "marks the test case as skipped" do
+            expect(test_case).to receive(:skipped=).with(true)
+            cucumber.after_steps(step)
+          end
         end
       end
 
