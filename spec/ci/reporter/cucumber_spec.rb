@@ -121,21 +121,24 @@ module CI::Reporter
           expect(testcases.first).to eql test_case
         end
 
-        it "alters the name of a test case that is pending to include '(PENDING)'" do
+        it "skips and alters the name of a test case that is pending to include '(PENDING)'" do
           allow(step).to receive(:status).and_return(:pending)
           expect(test_case).to receive(:name=).with("Step Name (PENDING)")
+          expect(test_case).to receive(:skipped=).with(true)
           cucumber.after_steps(step)
         end
 
-        it "alters the name of a test case that is undefined to include '(PENDING)'" do
+        it "skips and alters the name of a test case that is undefined to include '(PENDING)'" do
           allow(step).to receive(:status).and_return(:undefined)
           expect(test_case).to receive(:name=).with("Step Name (PENDING)")
+          expect(test_case).to receive(:skipped=).with(true)
           cucumber.after_steps(step)
         end
 
-        it "alter the name of a test case that was skipped to include '(SKIPPED)'" do
+        it "skips and alters the name of a test case that was skipped to include '(SKIPPED)'" do
           allow(step).to receive(:status).and_return(:skipped)
           expect(test_case).to receive(:name=).with("Step Name (SKIPPED)")
+          expect(test_case).to receive(:skipped=).with(true)
           cucumber.after_steps(step)
         end
       end
