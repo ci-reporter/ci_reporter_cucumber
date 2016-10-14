@@ -110,11 +110,14 @@ module CI
       def before_table_row(table_row)
         row = table_row # shorthand for table_row
         # check multiple versions of the row and try to find the best fit
-        outline = (row.respond_to? :name)             ? row.name :
-                  (row.respond_to? :scenario_outline) ? row.scenario_outline :
-                                                        row.to_s
-        @test_case = TestCase.new("#@scenario (outline: #{outline})")
-        @test_case.start
+
+        if row.respond_to? :scenario_outline
+          outline = (row.respond_to? :name)             ? row.name :
+                    (row.respond_to? :scenario_outline) ? row.scenario_outline :
+                                                          row.to_s
+          @test_case = TestCase.new("#@scenario (outline: #{outline})")
+          @test_case.start
+        end
       end
 
       def after_table_row(table_row)
@@ -122,11 +125,14 @@ module CI
           @header_row = false
           return
         end
-        @test_case.finish
-        if table_row.respond_to? :failed?
-          @test_case.failures << CucumberFailure.new(table_row) if table_row.failed?
-          test_suite.testcases << @test_case
-          @test_case = nil
+
+        if table_row.respond_to?(:scenario_outline)
+          @test_case.finish
+          if table_row.respond_to? :failed?
+            @test_case.failures << CucumberFailure.new(table_row) if table_row.failed?
+            test_suite.testcases << @test_case
+            @test_case = nil
+          end
         end
       end
     end
