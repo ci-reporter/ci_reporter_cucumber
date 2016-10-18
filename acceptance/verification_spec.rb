@@ -17,7 +17,7 @@ describe "Cucumber acceptance" do
     it { is_expected.to have(0).errors }
     it { expect(result.skipped_count).to be 1 }
     it { is_expected.to have(2).failures }
-    it { is_expected.to have(4).testcases }
+    it { is_expected.to have(7).testcases }
 
     it_behaves_like "a report with consistent attribute counts"
     it_behaves_like "assertions are not tracked"
@@ -54,6 +54,35 @@ describe "Cucumber acceptance" do
         it "has a type" do
           expect(failure.type).to match /RuntimeError/
         end
+      end
+    end
+
+    describe "the test that uses a data table" do
+      subject(:testcase) { result.testcase('Using a data table in a scenario') }
+
+      it { is_expected.to have(0).failures }
+    end
+
+    context "the scenario outline with an examples table" do
+
+      let(:scenario_name) { 'Using a scenario outline' }
+      let(:example_1_string) { '| Example Cell A | Example Cell B | Example Cell C |' }
+      let(:example_2_string) { '| Example Cell D | Example Cell E | Example Cell F |' }
+
+      describe "the first example in the table" do
+        subject(:testcase) {
+          result.testcase("#{scenario_name} (outline: #{example_1_string})")
+        }
+
+        it { is_expected.to have(0).failures }
+      end
+
+      describe "the second example in the table" do
+        subject(:testcase) {
+          result.testcase("#{scenario_name} (outline: #{example_2_string})")
+        }
+
+        it { is_expected.to have(0).failures }
       end
     end
   end
