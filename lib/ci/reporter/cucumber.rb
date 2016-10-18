@@ -88,8 +88,10 @@ module CI
       end
 
       def before_steps(steps)
-        @test_case = TestCase.new(@scenario)
-        @test_case.start
+        if feature_element_type == :scenario
+          @test_case = TestCase.new(@scenario)
+          @test_case.start
+        end
       end
 
       def treat_pending_as_failure?
@@ -97,25 +99,27 @@ module CI
       end
 
       def after_steps(steps)
-        @test_case.finish
+        if feature_element_type == :scenario
+          @test_case.finish
 
-        case steps.status
-        when :pending, :undefined
-          if treat_pending_as_failure?
-            @test_case.failures << CucumberFailure.new(steps)
-          else
-            @test_case.name = "#{@test_case.name} (PENDING)"
-            @test_case.skipped = true
+          case steps.status
+            when :pending, :undefined
+              if treat_pending_as_failure?
+                @test_case.failures << CucumberFailure.new(steps)
+              else
+                @test_case.name = "#{@test_case.name} (PENDING)"
+                @test_case.skipped = true
+              end
+            when :skipped
+              @test_case.name = "#{@test_case.name} (SKIPPED)"
+              @test_case.skipped = true
+            when :failed
+              @test_case.failures << CucumberFailure.new(steps)
           end
-        when :skipped
-          @test_case.name = "#{@test_case.name} (SKIPPED)"
-          @test_case.skipped = true
-        when :failed
-          @test_case.failures << CucumberFailure.new(steps)
-        end
 
-        test_suite.testcases << @test_case
-        @test_case = nil
+          test_suite.testcases << @test_case
+          @test_case = nil
+        end
       end
 
       def before_examples(*args)

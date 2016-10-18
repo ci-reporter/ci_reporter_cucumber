@@ -84,11 +84,19 @@ module CI::Reporter
       let(:test_suite) { double("test_suite", testcases: testcases) }
       let(:cucumber) { new_instance }
       let(:test_case) { double("test_case", start: nil, finish: nil, name: "Step Name") }
+      let(:scenario) { double("scenario") }
       let(:step) { double("step", :status => :passed, name: "Step Name") }
 
       before :each do
         allow(cucumber).to receive(:test_suite).and_return(test_suite)
         allow(CI::Reporter::TestCase).to receive(:new).and_return(test_case)
+        cucumber.before_feature_element(scenario)
+
+        allow(cucumber).to receive(:feature_element_type).and_return(:scenario)
+      end
+
+      after :each do
+        cucumber.after_feature_element(scenario)
       end
 
       context "before steps" do
@@ -231,7 +239,21 @@ module CI::Reporter
         allow(cucumber).to receive(:test_suite).and_return(test_suite)
         allow(CI::Reporter::TestCase).to receive(:new).and_return(test_case)
 
+        cucumber.before_feature_element(scenario_outline)
         cucumber.scenario_name(nil, "Scenario Name")
+
+        allow(cucumber).to receive(:feature_element_type).and_return(:scenario_outline)
+      end
+
+      after :each do
+        cucumber.after_feature_element(scenario_outline)
+      end
+
+      context "before steps" do
+        it "does not create a new test case" do
+          expect(CI::Reporter::TestCase).to_not receive(:new)
+          cucumber.before_steps(step_collection)
+        end
       end
 
       context "processing a data table" do
