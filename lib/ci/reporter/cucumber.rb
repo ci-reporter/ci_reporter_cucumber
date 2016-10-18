@@ -65,6 +65,14 @@ module CI
         @name = (name || "Unnamed feature").split("\n").first
       end
 
+      def before_feature_element(feature_element)
+        @feature_element = feature_element
+      end
+
+      def after_feature_element(feature_element)
+        @feature_element = nil
+      end
+
       def scenario_name(keyword, name, *args)
         @scenario = (name || "Unnamed scenario").split("\n").first
       end
