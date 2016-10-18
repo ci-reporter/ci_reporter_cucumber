@@ -73,6 +73,16 @@ module CI
         @feature_element = nil
       end
 
+      def feature_element_type
+        if @feature_element.instance_of?(::Cucumber::Ast::Scenario)
+          return :scenario
+        elsif @feature_element.instance_of?(::Cucumber::Ast::ScenarioOutline)
+          return :scenario_outline
+        else
+          return :unknown
+        end
+      end
+
       def scenario_name(keyword, name, *args)
         @scenario = (name || "Unnamed scenario").split("\n").first
       end
