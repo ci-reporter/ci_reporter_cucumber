@@ -218,5 +218,47 @@ module CI::Reporter
         end
       end
     end
+
+    context "inside a scenario outline" do
+      let(:testcases) { [] }
+      let(:test_suite) { double("test_suite", testcases: testcases) }
+      let(:cucumber) { new_instance }
+      let(:test_case) { double("test_case", start: nil, finish: nil, name: "Step Name") }
+      let(:scenario_outline) { double("scenario_outline") }
+      let(:step_collection) { double("step_collection") }
+
+      before :each do
+        allow(cucumber).to receive(:test_suite).and_return(test_suite)
+        allow(CI::Reporter::TestCase).to receive(:new).and_return(test_case)
+
+        cucumber.scenario_name(nil, "Scenario Name")
+      end
+
+      context "processing a data table" do
+        let(:table_row) { double("table_row", name: "Table Row Name") }
+
+        describe "before table row" do
+          it "does not create a new test case" do
+            expect(CI::Reporter::TestCase).to_not receive(:new)
+            cucumber.before_table_row(table_row)
+          end
+        end
+      end
+
+      context "processing an examples table" do
+        let(:table_row) do
+          double("table_row", name: "Table Row Name", scenario_outline: scenario_outline)
+        end
+        let(:expected_test_case_name) { "Scenario Name (outline: Table Row Name)" }
+
+        describe "before table row" do
+          it "creates a new test case" do
+            expect(CI::Reporter::TestCase).to receive(:new).with(expected_test_case_name)
+            cucumber.before_table_row(table_row)
+          end
+        end
+      end
+    end
+
   end
 end
