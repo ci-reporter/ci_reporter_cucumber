@@ -112,10 +112,7 @@ module CI
         # check multiple versions of the row and try to find the best fit
 
         if row.respond_to?(:scenario_outline) && !@header_row
-          outline = (row.respond_to? :name)             ? row.name :
-                    (row.respond_to? :scenario_outline) ? row.scenario_outline :
-                                                          row.to_s
-          @test_case = TestCase.new("#@scenario (outline: #{outline})")
+          @test_case = TestCase.new("#@scenario (outline: #{row.name})")
           @test_case.start
         end
       end
