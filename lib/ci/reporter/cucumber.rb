@@ -108,11 +108,8 @@ module CI
       end
 
       def before_table_row(table_row)
-        row = table_row # shorthand for table_row
-        # check multiple versions of the row and try to find the best fit
-
-        if row.respond_to?(:scenario_outline) && !@header_row
-          @test_case = TestCase.new("#@scenario (outline: #{row.name})")
+        if table_row.respond_to?(:scenario_outline) && !@header_row
+          @test_case = TestCase.new("#@scenario (outline: #{table_row.name})")
           @test_case.start
         end
       end
