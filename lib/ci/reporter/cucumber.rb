@@ -111,7 +111,7 @@ module CI
         row = table_row # shorthand for table_row
         # check multiple versions of the row and try to find the best fit
 
-        if row.respond_to? :scenario_outline
+        if row.respond_to?(:scenario_outline) && !@header_row
           outline = (row.respond_to? :name)             ? row.name :
                     (row.respond_to? :scenario_outline) ? row.scenario_outline :
                                                           row.to_s
