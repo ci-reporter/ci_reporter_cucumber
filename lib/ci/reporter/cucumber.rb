@@ -65,13 +65,33 @@ module CI
         @name = (name || "Unnamed feature").split("\n").first
       end
 
+      def before_feature_element(feature_element)
+        @feature_element = feature_element
+      end
+
+      def after_feature_element(feature_element)
+        @feature_element = nil
+      end
+
+      def feature_element_type
+        if @feature_element.instance_of?(::Cucumber::Ast::Scenario)
+          return :scenario
+        elsif @feature_element.instance_of?(::Cucumber::Ast::ScenarioOutline)
+          return :scenario_outline
+        else
+          return :unknown
+        end
+      end
+
       def scenario_name(keyword, name, *args)
         @scenario = (name || "Unnamed scenario").split("\n").first
       end
 
       def before_steps(steps)
-        @test_case = TestCase.new(@scenario)
-        @test_case.start
+        if feature_element_type == :scenario
+          @test_case = TestCase.new(@scenario)
+          @test_case.start
+        end
       end
 
       def treat_pending_as_failure?
@@ -79,25 +99,27 @@ module CI
       end
 
       def after_steps(steps)
-        @test_case.finish
+        if feature_element_type == :scenario
+          @test_case.finish
 
-        case steps.status
-        when :pending, :undefined
-          if treat_pending_as_failure?
-            @test_case.failures << CucumberFailure.new(steps)
-          else
-            @test_case.name = "#{@test_case.name} (PENDING)"
-            @test_case.skipped = true
+          case steps.status
+            when :pending, :undefined
+              if treat_pending_as_failure?
+                @test_case.failures << CucumberFailure.new(steps)
+              else
+                @test_case.name = "#{@test_case.name} (PENDING)"
+                @test_case.skipped = true
+              end
+            when :skipped
+              @test_case.name = "#{@test_case.name} (SKIPPED)"
+              @test_case.skipped = true
+            when :failed
+              @test_case.failures << CucumberFailure.new(steps)
           end
-        when :skipped
-          @test_case.name = "#{@test_case.name} (SKIPPED)"
-          @test_case.skipped = true
-        when :failed
-          @test_case.failures << CucumberFailure.new(steps)
-        end
 
-        test_suite.testcases << @test_case
-        @test_case = nil
+          test_suite.testcases << @test_case
+          @test_case = nil
+        end
       end
 
       def before_examples(*args)
@@ -108,13 +130,10 @@ module CI
       end
 
       def before_table_row(table_row)
-        row = table_row # shorthand for table_row
-        # check multiple versions of the row and try to find the best fit
-        outline = (row.respond_to? :name)             ? row.name :
-                  (row.respond_to? :scenario_outline) ? row.scenario_outline :
-                                                        row.to_s
-        @test_case = TestCase.new("#@scenario (outline: #{outline})")
-        @test_case.start
+        if table_row.respond_to?(:scenario_outline) && !@header_row
+          @test_case = TestCase.new("#@scenario (outline: #{table_row.name})")
+          @test_case.start
+        end
       end
 
       def after_table_row(table_row)
@@ -122,11 +141,14 @@ module CI
           @header_row = false
           return
         end
-        @test_case.finish
-        if table_row.respond_to? :failed?
-          @test_case.failures << CucumberFailure.new(table_row) if table_row.failed?
-          test_suite.testcases << @test_case
-          @test_case = nil
+
+        if table_row.respond_to?(:scenario_outline)
+          @test_case.finish
+          if table_row.respond_to? :failed?
+            @test_case.failures << CucumberFailure.new(table_row) if table_row.failed?
+            test_suite.testcases << @test_case
+            @test_case = nil
+          end
         end
       end
     end
